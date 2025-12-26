@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager - Local Storage Version</title>
+    <style>
+        /* Copy all CSS from style.css here */
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .auth-form { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 5px; }
+        input, button { display: block; width: 100%; margin: 10px 0; padding: 10px; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Task Manager (Local Storage Demo)</h1>
+    
+    <div id="auth">
+        <div id="login-form">
+            <h2>Login</h2>
+            <input type="text" id="login-user" placeholder="Username" value="demo">
+            <input type="password" id="login-pass" placeholder="Password" value="demo123">
+            <button onclick="localLogin()">Login</button>
+            <p>Demo credentials: demo / demo123</p>
+        </div>
+    </div>
+
+    <div id="app" style="display:none;">
+        <h2>Welcome, <span id="username"></span>!</h2>
+        <button onclick="localLogout()">Logout</button>
+        
+        <div>
+            <h3>Add Task</h3>
+            <input type="text" id="task-title" placeholder="Task title">
+            <button onclick="addLocalTask()">Add Task</button>
+        </div>
+        
+        <div id="tasks-list">
+            <!-- Tasks will appear here -->
+        </div>
+    </div>
+
+    <script>
+        // Local storage version (no backend needed)
+        function localLogin() {
+            const username = document.getElementById('login-user').value;
+            const password = document.getElementById('login-pass').value;
+            
+            if (username === 'demo' && password === 'demo123') {
+                localStorage.setItem('user', username);
+                document.getElementById('username').textContent = username;
+                document.getElementById('auth').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+                loadLocalTasks();
+            } else {
+                alert('Use demo/demo123 or implement your own logic');
+            }
+        }
+        
+        function localLogout() {
+            localStorage.removeItem('user');
+            document.getElementById('auth').style.display = 'block';
+            document.getElementById('app').style.display = 'none';
+        }
+        
+        function loadLocalTasks() {
+            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            const list = document.getElementById('tasks-list');
+            list.innerHTML = '<h3>Your Tasks:</h3>';
+            
+            tasks.forEach(task => {
+                list.innerHTML += `<div>${task.title} <button onclick="deleteTask('${task.id}')">X</button></div>`;
+            });
+        }
+        
+        function addLocalTask() {
+            const title = document.getElementById('task-title').value;
+            if (!title) return;
+            
+            const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+            tasks.push({
+                id: Date.now().toString(),
+                title: title,
+                createdAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            document.getElementById('task-title').value = '';
+            loadLocalTasks();
+        }
+        
+        // Check if already logged in
+        if (localStorage.getItem('user')) {
+            localLogin();
+        }
+    </script>
+</body>
+</html>
